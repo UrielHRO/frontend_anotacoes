@@ -19,9 +19,14 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     // Se o erro for 401 (Não Autorizado) - ex: token expirado
     if (error.response?.status === 401) {
-      localStorage.removeItem('@App:token');
-      localStorage.removeItem('@App:user');
-      window.location.reload(); 
+      // Só forçar o reload se já existia um token (ex: token expirado enquanto usuário logado)
+      // Evita recarregar a página quando a requisição de login falha com 401.
+      const existingToken = localStorage.getItem('@App:token');
+      if (existingToken) {
+        localStorage.removeItem('@App:token');
+        localStorage.removeItem('@App:user');
+        window.location.reload();
+      }
     }
     return Promise.reject(error);
   }
