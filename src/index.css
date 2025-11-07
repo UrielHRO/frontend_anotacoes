@@ -1,26 +1,172 @@
-/* ==============================================
-   Reset Básico e Tema Global
-   ============================================== */
-* {
-  box-sizing: border-box;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+/* ---------- Base & Reset ---------- */
+html, body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  background: #f7f8fa;
+  color: #222;
+  min-height: 100vh;
+}
+* { box-sizing: border-box; }
+
+/* Central container for auth pages (inspired by Bedimcode) */
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  background: #f7f8fa;
+}
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 36px 28px;
+  box-shadow: 0 10px 30px rgba(20, 30, 60, 0.06);
+}
+.auth-card h2 {
+  margin: 0 0 22px 0;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
 }
 
-body {
-  background-color: #f4f7f6; /* Fundo cinza claro */
-  color: #1a202c; 
+/* Floating label inputs */
+.form-group { position: relative; margin-bottom: 18px; }
+.form-group input {
+  width: 100%;
+  padding: 16px 14px 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #e6eef9;
+  background: #fff;
+  font-size: 15px;
+  color: #111827;
+}
+.form-group input:focus { outline: none; border-color: #4f7ef5; box-shadow: 0 6px 18px rgba(79,126,245,0.08); }
+.form-group input.input-error { border-color: #f87171; }
+.form-group label {
+  position: absolute; left: 14px; top: 14px; color: #4f7ef5; font-size: 14px; background: #fff; padding: 0 6px; transition: all 0.18s ease;
+}
+.form-group input:focus + label, .form-group input:not(:placeholder-shown) + label {
+  transform: translateY(-22px); font-size: 12px; color: #1f3bb3;
+}
+.form-group .error-message { color: #f87171; font-size: 13px; margin-top: 8px; }
+
+/* Primary button */
+.auth-card button { width: 100%; padding: 12px 16px; border-radius: 10px; border: none; background: linear-gradient(90deg,#4f7ef5,#7aa2ff); color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; }
+.auth-card button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.auth-link { text-align: center; margin-top: 14px; font-size: 14px; }
+.auth-link a { color: #4f7ef5; text-decoration: underline; }
+
+/* Dashboard/Header */
+.app-header { background: #fff; padding: 10px 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: sticky; top:0; z-index: 40; }
+.header-content { max-width: 1200px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; gap: 1rem; }
+.header-left { display:flex; align-items:center; gap: 1rem; }
+.header-left h1 { margin:0; font-size: 20px; }
+.search-bar input { padding: 8px 12px; border-radius: 8px; border: 1px solid #e6eef9; }
+.header-right { display:flex; align-items:center; gap: 0.8rem; }
+.logout-btn { background: #ff4d4f; color:#fff; border-radius:8px; padding:6px 10px; border:none; cursor:pointer; }
+.logout-btn:hover { background:#d90429; }
+
+/* Dashboard main */
+.dashboard-container { max-width: 1100px; margin: 24px auto; padding: 18px; }
+.notes-list h2 { margin-top:0; }
+.notes-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:16px; }
+.note-item { background:#fff; border-radius:12px; padding:12px; box-shadow: 0 6px 20px rgba(18,30,80,0.04); display:flex; flex-direction:column; gap:8px; }
+.note-actions { display:flex; gap:8px; margin-top:auto; }
+.note-actions button { padding:6px 10px; border-radius:8px; border:none; cursor:pointer; font-weight:600; }
+.btn-edit { background:#ffd700; color:#111827; }
+.btn-edit:hover { background:#ffea7a; }
+.btn-delete { background:#ff4d4f; color:#fff; }
+.btn-delete:hover { background:#d90429; }
+
+/* Modal edit form */
+.modal-overlay { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.28); z-index:80; }
+.form-note-modal { width: 100%; max-width: 520px; background:#fff; padding:20px; border-radius:12px; }
+.form-actions { display:flex; gap:12px; justify-content:flex-end; margin-top:12px; }
+
+/* Small responsive tweaks */
+@media (max-width:640px) {
+  .auth-card { padding: 22px; max-width: 92%; }
+  .dashboard-container { padding: 12px; }
 }
 
-a {
-  color: #007bff;
-  text-decoration: none;
+/* Modal edit form */
+.modal-overlay { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.28); z-index:80; }
+.form-note-modal { width: 100%; max-width: 520px; background:#fff; padding:20px; border-radius:12px; }
+.form-actions { display:flex; gap:12px; justify-content:flex-end; margin-top:12px; }
+
+/* Small responsive tweaks */
+@media (max-width:640px) {
+  .auth-card { padding: 22px; max-width: 92%; }
+  .dashboard-container { padding: 12px; }
+}
+
+input:focus {
+  border-color: #3a6ee8;
+  box-shadow: 0 0 0 2px #3a6ee822;
+}
+input.input-error {
+  border-color: #e83a3a;
+  box-shadow: 0 0 0 2px #e83a3a22;
+}
+
+label {
   font-weight: 500;
+  color: #3a6ee8;
+  margin-bottom: 0.3rem;
 }
-a:hover {
-  text-decoration: underline;
+
+button {
+  padding: 0.9rem 1.1rem;
+  border-radius: 0.7rem;
+  border: none;
+  background: linear-gradient(90deg, #3a6ee8 0%, #6b8cff 100%);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(60, 80, 180, 0.10);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+button:disabled {
+  background: #bfcbe6;
+  cursor: not-allowed;
+}
+button:hover:not(:disabled) {
+  background: linear-gradient(90deg, #6b8cff 0%, #3a6ee8 100%);
+  box-shadow: 0 4px 16px rgba(60, 80, 180, 0.18);
+}
+
+.error-message {
+  color: #e83a3a;
+  font-size: 0.98rem;
+  margin-top: -0.7rem;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.success-message {
+  color: #3a6ee8;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+@media (max-width: 600px) {
+  .app-container {
+    max-width: 98vw;
+    padding: 1.2rem 0.5rem;
+  }
+  .form-container {
+    padding: 1.2rem 0.5rem;
+  }
 }
 
 /* ==============================================
@@ -42,7 +188,7 @@ a:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap; /* Para telas menores */
+  flex-wrap: wrap; 
   gap: 1rem;
 }
 
@@ -180,11 +326,6 @@ main.dashboard-container {
 
 .notes-grid {
   display: grid;
-  /* Cria colunas responsivas:
-     - Tenta preencher com colunas de 280px
-     - Se não couber, elas encolhem (minmax)
-     - '1fr' faz com que ocupem o espaço total
-  */
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
 }
@@ -285,7 +426,7 @@ main.dashboard-container {
 }
 
 /* ==============================================
-   Telas de Login e Cadastro (Sem Mudanças)
+   Telas de Login e Cadastro
    ============================================== */
 .form-container {
   display: flex;

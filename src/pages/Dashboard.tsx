@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
-import { toast } from 'react-toastify';
+import { showSuccess, showError } from '../utils/toast';
 import { type Note } from '../types/index';
 import { AxiosError } from 'axios';
 import { useDebounce } from '../hooks/useDebounce'; 
@@ -23,17 +23,17 @@ export const DashboardPage = () => {
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
   const [loadingCreate, setLoadingCreate] = useState(false);
+  const [createErrors, setCreateErrors] = useState<{ title?: string; content?: string }>({});
   
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
+  const [editErrors, setEditErrors] = useState<{ title?: string; content?: string }>({});
 
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 500); 
 
-  // --- 🔰 FUNÇÃO ATUALIZADA 🔰 ---
-  // Esta função agora é mais inteligente e só envia o filtro 'title'
-  // se o termo de busca (debouncedSearchTerm) não estiver vazio.
+ 
   const fetchNotes = useCallback(async () => {
     try {
       setLoadingNotes(true);
@@ -47,8 +47,6 @@ export const DashboardPage = () => {
       }
 
       // 3. Envia a requisição.
-      // Se a busca estiver vazia, 'params' será {} e nenhuma query param será enviada.
-      // Se a busca tiver texto, 'params' será { title: "..." } e a API vai filtrar.
       const response = await api.get<Note[]>('/notes', { params });
       
       setNotes(response.data);
@@ -57,7 +55,7 @@ export const DashboardPage = () => {
       if (error instanceof AxiosError && error.response?.data?.message) {
         message = error.response.data.message;
       }
-      toast.error(message);
+  showError(message);
     } finally {
       setLoadingNotes(false);
     }
@@ -69,21 +67,39 @@ export const DashboardPage = () => {
     fetchNotes();
   }, [fetchNotes]);
 
+  const validateCreate = () => {
+    const errors: { title?: string; content?: string } = {};
+    if (!newTitle) {
+      errors.title = 'O título é obrigatório.';
+    } else if (newTitle.length < 2) {
+      errors.title = 'O título deve ter pelo menos 2 caracteres.';
+    }
+    if (!newContent) {
+      errors.content = 'O conteúdo é obrigatório.';
+    } else if (newContent.length < 2) {
+      errors.content = 'O conteúdo deve ter pelo menos 2 caracteres.';
+    }
+    setCreateErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleCreateNote = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!validateCreate()) return;
     setLoadingCreate(true);
     try {
       await api.post<Note>('/notes', { title: newTitle, content: newContent });
       setNewTitle('');
       setNewContent('');
-      toast.success('Anotação criada!');
+      setCreateErrors({});
+      showSuccess('Anotação criada!');
       fetchNotes(); 
     } catch (error) {
       let message = 'Erro ao criar anotação.';
       if (error instanceof AxiosError && error.response?.data?.message) {
         message = error.response.data.message;
       }
-      toast.error(message);
+      showError(message);
     } finally {
       setLoadingCreate(false);
     }
@@ -95,37 +111,53 @@ export const DashboardPage = () => {
     
     try {
       await api.delete(`/notes/${idToDelete}`);
-      toast.success('Anotação deletada.');
+  showSuccess('Anotação deletada.');
       fetchNotes(); 
     } catch (error) {
       let message = 'Erro ao deletar anotação.';
       if (error instanceof AxiosError && error.response?.data?.message) {
         message = error.response.data.message;
       }
-      toast.error(message);
+  showError(message);
     }
+  };
+
+  const validateEdit = () => {
+    const errors: { title?: string; content?: string } = {};
+    if (!editTitle) {
+      errors.title = 'O título é obrigatório.';
+    } else if (editTitle.length < 2) {
+      errors.title = 'O título deve ter pelo menos 2 caracteres.';
+    }
+    if (!editContent) {
+      errors.content = 'O conteúdo é obrigatório.';
+    } else if (editContent.length < 2) {
+      errors.content = 'O conteúdo deve ter pelo menos 2 caracteres.';
+    }
+    setEditErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleUpdateNote = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editingNote) return;
-    
+    if (!validateEdit()) return;
     const idToUpdate = getNoteId(editingNote);
-    
     try {
       await api.put<Note>(`/notes/${idToUpdate}`, {
         title: editTitle,
         content: editContent
       });
       cancelEditing();
-      toast.success('Anotação atualizada!');
+      setEditErrors({});
+      showSuccess('Anotação atualizada!');
       fetchNotes(); 
     } catch (error) {
       let message = 'Erro ao atualizar anotação.';
       if (error instanceof AxiosError && error.response?.data?.message) {
         message = error.response.data.message;
       }
-      toast.error(message);
+      showError(message);
     }
   };
   
@@ -145,21 +177,31 @@ export const DashboardPage = () => {
       {/* Modal de Edição (ficará por cima de tudo) */}
       {editingNote && (
         <div className="modal-overlay">
-          <form onSubmit={handleUpdateNote} className="form-note form-note-modal">
+          <form onSubmit={handleUpdateNote} className="form-note form-note-modal" noValidate>
             <h3>Editando Anotação</h3>
+            <label htmlFor="edit-title">Título</label>
             <input 
+              id="edit-title"
               type="text" 
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
               placeholder="Título"
-              required
+              className={editErrors.title ? 'input-error' : ''}
+              autoComplete="off"
             />
+            {editErrors.title && <div className="error-message">{editErrors.title}</div>}
+
+            <label htmlFor="edit-content">Conteúdo</label>
             <textarea
+              id="edit-content"
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               placeholder="Conteúdo"
-              required
+              className={editErrors.content ? 'input-error' : ''}
+              autoComplete="off"
             ></textarea>
+            {editErrors.content && <div className="error-message">{editErrors.content}</div>}
+
             <div className="form-actions">
               <button type="submit">Salvar</button>
               <button type="button" onClick={cancelEditing}>Cancelar</button>
@@ -192,20 +234,30 @@ export const DashboardPage = () => {
       {/* Container Principal */}
       <main className="dashboard-container">
         {/* Formulário de Criação (Estilo Google Keep) */}
-        <form onSubmit={handleCreateNote} className="form-note create-note-form">
+        <form onSubmit={handleCreateNote} className="form-note create-note-form" noValidate>
+          <label htmlFor="note-title">Título</label>
           <input 
+            id="note-title"
             type="text" 
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             placeholder="Título"
-            required
+            className={createErrors.title ? 'input-error' : ''}
+            autoComplete="off"
           />
+          {createErrors.title && <div className="error-message">{createErrors.title}</div>}
+
+          <label htmlFor="note-content">Conteúdo</label>
           <textarea
+            id="note-content"
             value={newContent}
             onChange={(e) => setNewContent(e.target.value)}
             placeholder="Criar uma anotação..."
-            required
+            className={createErrors.content ? 'input-error' : ''}
+            autoComplete="off"
           ></textarea>
+          {createErrors.content && <div className="error-message">{createErrors.content}</div>}
+
           <button type="submit" disabled={loadingCreate}>
             {loadingCreate ? 'Salvando...' : 'Salvar'}
           </button>
@@ -227,8 +279,8 @@ export const DashboardPage = () => {
                     <h3>{note.title}</h3>
                     <p>{note.content}</p>
                     <div className="note-actions">
-                      <button onClick={() => startEditing(note)} title="Editar">Editar</button>
-                      <button onClick={() => handleDeleteNote(note)} title="Deletar">Deletar</button> 
+                      <button className="btn-edit" onClick={() => startEditing(note)} title="Editar">Editar</button>
+                      <button className="btn-delete" onClick={() => handleDeleteNote(note)} title="Deletar">Deletar</button> 
                     </div>
                   </div>
                 ))
