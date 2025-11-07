@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { jwtDecode } from 'jwt-decode';
-import { AxiosError } from 'axios';
 import { type AuthProviderProps, type DecodedToken, type User, type AuthResult } from '../types';
 import { AuthContext } from '../hooks/useAuth'; 
 
@@ -46,12 +45,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return { success: true };
 
     } catch (error) {
-      let message = 'Erro no login.';
-      if (error instanceof AxiosError && error.response?.data?.message) {
-        message = error.response.data.message;
-      }
-      console.error('Falha no login:', message);
-      return { success: false, message: message };
+      // Sempre retorna a mensagem genérica para credenciais inválidas
+      console.error('Falha no login:', error);
+      return { success: false, message: 'Credenciais inválidas' };
     }
   };
 
@@ -60,12 +56,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       await api.post('/auth/register', { name, email, password });
       return { success: true };
     } catch (error) {
-      let message = 'Erro no registro.';
-      if (error instanceof AxiosError && error.response?.data?.message) {
-        message = error.response.data.message;
-      }
-      console.error('Falha no registro:', message);
-      return { success: false, message: message };
+      // Mantém mensagem genérica para erros de registro também
+      console.error('Falha no registro:', error);
+      return { success: false, message: 'Não foi possível realizar o cadastro. Tente novamente.' };
     }
   };
 

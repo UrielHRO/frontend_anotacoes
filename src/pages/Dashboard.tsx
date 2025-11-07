@@ -4,6 +4,7 @@ import { api } from '../services/api';
 import { showSuccess, showError } from '../utils/toast';
 import { type Note } from '../types/index';
 import { AxiosError } from 'axios';
+import { toast } from 'react-toastify';
 import { useDebounce } from '../hooks/useDebounce'; 
 
 // Helper para obter o ID correto da nota
@@ -107,19 +108,71 @@ export const DashboardPage = () => {
 
   const handleDeleteNote = async (noteToDelete: Note) => {
     const idToDelete = getNoteId(noteToDelete);
-    if (!window.confirm('Tem certeza que deseja deletar esta nota?')) return;
     
-    try {
-      await api.delete(`/notes/${idToDelete}`);
-  showSuccess('Anotação deletada.');
-      fetchNotes(); 
-    } catch (error) {
-      let message = 'Erro ao deletar anotação.';
-      if (error instanceof AxiosError && error.response?.data?.message) {
-        message = error.response.data.message;
+    // Usando o toast.warn para confirmação com um promise
+    toast.warn(
+      <div>
+        <p>Tem certeza que deseja deletar esta nota?</p>
+        <div style={{ marginTop: '10px' }}>
+          <button 
+            onClick={() => toast.dismiss()} 
+            style={{ 
+              marginRight: '10px',
+              background: '#6c757d',
+              color: 'white',
+              border: 'none',
+              padding: '5px 10px',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Cancelar
+          </button>
+          <button 
+            onClick={async () => {
+              toast.dismiss();
+              try {
+                await api.delete(`/notes/${idToDelete}`);
+                showSuccess('Anotação deletada.');
+                fetchNotes();
+              } catch (error) {
+                let message = 'Erro ao deletar anotação.';
+                if (error instanceof AxiosError && error.response?.data?.message) {
+                  message = error.response.data.message;
+                }
+                showError(message);
+              }
+            }}
+            style={{ 
+              background: '#ff4d4f',
+              color: 'white',
+              border: 'none',
+              padding: '5px 10px',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Deletar
+          </button>
+        </div>
+      </div>,
+      {
+        position: "top-center",
+        autoClose: false,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: false,
+        closeButton: false,
+        theme: "light",
+        style: {
+          backgroundColor: '#fff',
+          color: '#333',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          border: '1px solid #e0e0e0'
+        }
       }
-  showError(message);
-    }
+    );
   };
 
   const validateEdit = () => {
@@ -174,7 +227,7 @@ export const DashboardPage = () => {
 
   return (
     <>
-      {/* Modal de Edição (ficará por cima de tudo) */}
+      {}
       {editingNote && (
         <div className="modal-overlay">
           <form onSubmit={handleUpdateNote} className="form-note form-note-modal" noValidate>
