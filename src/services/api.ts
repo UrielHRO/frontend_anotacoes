@@ -21,7 +21,6 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('@App:token');
       localStorage.removeItem('@App:user');
-      // Recarrega a página, o AuthContext vai ver que não tem token e redirecionar
       window.location.reload(); 
     }
     return Promise.reject(error);
