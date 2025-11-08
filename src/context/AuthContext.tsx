@@ -3,6 +3,7 @@ import { api } from '../services/api';
 import { jwtDecode } from 'jwt-decode';
 import { type AuthProviderProps, type DecodedToken, type User, type AuthResult } from '../types';
 import { AuthContext } from '../hooks/useAuth'; 
+import { showSuccess } from '../utils/toast';
 
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -68,6 +69,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setToken(null);
     setUser(null);
     delete api.defaults.headers.common['Authorization'];
+    
+    // Exibe o toast primeiro
+    showSuccess('Logout realizado com sucesso!', {
+      onClose: () => {
+        // Força uma recarga da página após o toast fechar
+        window.location.href = '/login';
+      }
+    });
   };
 
   return (
